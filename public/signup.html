@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>狼人杀-注册</title>
+  <style>
+    .signup-btn-con {
+      margin: 12px;
+    }
+    .copyright {
+      position: absolute;
+      bottom: 12px;
+      left: 0px;
+      right: 0px;
+      text-align: center;
+      color: #CCC;
+      font-size: 14px;
+    }
+  </style>
+  <link rel="stylesheet" href="//res.wx.qq.com/open/libs/weui/1.1.2/weui.min.css">
+</head>
+<body>
+  <div id="app">
+      <div class="weui-cells weui-cells_form">
+          <div class="weui-cell">
+              <div class="weui-cell__hd"><label class="weui-label">用户名</label></div>
+              <div class="weui-cell__bd">
+                  <input v-model="userName" class="weui-input" type="text" placeholder="字母开头,最少四位">
+              </div>
+          </div>
+          <div class="weui-cell">
+              <div class="weui-cell__hd"><label class="weui-label">密码</label></div>
+              <div class="weui-cell__bd">
+                  <input v-model="password" class="weui-input" type="password" placeholder="数字字母组合,最少6位">
+              </div>
+          </div>
+          <div class="weui-cell">
+              <div class="weui-cell__hd"><label class="weui-label">确认密码</label></div>
+              <div class="weui-cell__bd">
+                  <input v-model="rePassword" class="weui-input" type="password" placeholder="请在输入一次密码">
+              </div>
+          </div>
+        </div>
+      
+        <div class="signup-btn-con">
+          <a href="#" v-on:click="signup" class="weui-btn weui-btn_primary">注册</a>
+        </div>
+      
+        <div class="copyright">
+          &copy; 东农Jser俱乐部
+        </div>
+  </div>
+  <script src="https://cdn.bootcss.com/vue/2.4.4/vue.min.js"></script>
+  <script src="https://cdn.bootcss.com/axios/0.16.2/axios.min.js"></script>
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        userName: 'jser',
+        password: '123123',
+        rePassword: '123123'
+      },
+      methods: {
+        signup() {
+          if (this.userName.length < 4) {
+            alert('用户名长度不够');
+            return;
+          }
+
+          if (this.password !== this.rePassword) {
+            alert('两次输入的密码不一致');
+            return;
+          }
+
+          var data = {
+            userName: this.userName,
+            password: this.password,
+            rePassword: this.rePassword
+          };
+
+          axios.post('/signup', data).then(function (res) {
+            if (res.data.message === '注册成功') {
+              location.href = '/signin.html';
+              return;
+            }
+            alert(res.data.message);
+          });
+        }
+      }
+    })
+  </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>狼人杀</title>
+  <link rel="stylesheet" href="//res.wx.qq.com/open/libs/weui/1.1.2/weui.min.css">
+</head>
+<body>
+    <a href="#" id="btn" class="weui-btn weui-btn_primary">创建房间</a>
+
+    <script src="https://cdn.bootcss.com/axios/0.16.2/axios.min.js"></script>
+    <script>
+      document.getElementById('btn').onclick = function () {
+        axios.get('/createRoom').then(function (res) {
+          if (res.data.message === '请登录后再操作') {
+            location = '/signin.html';
+            return;
+          }
+          console.log(res.data);
+        })
+      }
+    </script>
+</body>
+</html>
