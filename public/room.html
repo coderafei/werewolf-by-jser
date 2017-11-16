@@ -6,9 +6,33 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>狼人杀</title>
   <link rel="stylesheet" href="//res.wx.qq.com/open/libs/weui/1.1.2/weui.min.css">
+  <style>
+    .btn-con {
+      margin: 12px;
+    }
+  </style>
 </head>
 <body>
-    <a href="#" id="btn" class="weui-btn weui-btn_primary">创建房间</a>
+  
+    <div class="btn-con">
+        <a href="#" id="btn" class="weui-btn weui-btn_primary">创建房间</a>
+    </div>
+
+    <div style="height: 36px;"></div>
+
+    <!-- 输入框 -->
+    <div class="weui-cells weui-cells_form">
+        <div class="weui-cell">
+            <div class="weui-cell__hd"><label class="weui-label">房间号</label></div>
+            <div class="weui-cell__bd">
+                <input class="weui-input" type="text" placeholder="请输入房间号">
+            </div>
+        </div>
+    </div>
+    <div class="btn-con">
+        <a href="#" id="btn" class="weui-btn weui-btn_primary">加入房间</a>
+    </div>
+    
 
     <script src="https://cdn.bootcss.com/axios/0.16.2/axios.min.js"></script>
     <script>

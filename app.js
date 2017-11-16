@@ -62,18 +62,42 @@ app.post('/signin', function (req, res) {
   });
 });
 
-app.get('/createRoom', function (req, res) {
+app.post('/createRoom', function (req, res) {
   var userId = req.cookies.userId;
+  var room = req.body;
 
   if (!userId) {
     res.json({message: '请登录后再操作'});
     return;
   }
 
-  console.log(userId);
-  res.json({message: 'ok'});
+  getRoomNo(function (roomNo) {
+    room.no = roomNo;
+    room.createdAt = new Date();
+    room.creatorId = userId;
+
+    var Room = mongodb.collection('room');
+
+    Room.insert(room, function (err, dbRoom) {
+      res.json({message: 'ok', roomNo: roomNo});
+    });
+  });
 });
 
 app.listen(3000, function () {
   console.log('Server startup, listening port 3000');
 });
+
+
+function getRoomNo(callback) {
+  var roomNo = Math.random().toString().substr(2, 4);
+
+  var Room = mongodb.collection('room');
+  Room.findOne({ no: roomNo }, function (err, dbRoom) {
+    if (dbRoom) {
+      getRoomNo(callback);
+      return;
+    }
+    callback(roomNo);
+  });
+}
