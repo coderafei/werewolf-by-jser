@@ -76,10 +76,113 @@ app.post('/createRoom', function (req, res) {
     room.createdAt = new Date();
     room.creatorId = userId;
 
+    var roles = [];
+    for (var i = 0; i < room.villagerCount; i++) {
+      roles.push('村民');
+    }
+
+    for (var i = 0; i < room.werewolfCount; i++) {
+      roles.push('狼人');
+    }
+
+    if (room.hasProphet) {
+      roles.push('预言家');
+    }
+
+    if (room.hasEnchantress) {
+      roles.push('女巫');
+    }
+
+    if (room.hasHunter) {
+      roles.push('猎人');
+    }
+
+    if (room.hasCupid) {
+      roles.push('丘比特');
+    }
+
+    if (room.hasGuard) {
+      roles.push('守卫');
+    }
+
+    if (room.hasIdiot) {
+      roles.push('白痴');
+    }
+
+    var seats = [];
+    var rolesLength = roles.length;
+    for (var i = 0; i < rolesLength; i++) {
+      var roleIndex = Math.floor(Math.random() * roles.length);
+      seats.push(roles[roleIndex]);
+      roles.splice(roleIndex, 1);
+    }
+
+    room.seats = seats;
+    room.users = [];
+
     var Room = mongodb.collection('room');
 
     Room.insert(room, function (err, dbRoom) {
       res.json({message: 'ok', roomNo: roomNo});
+    });
+  });
+});
+
+app.post('/roomInfo', function (req, res) {
+  var roomNo = req.body.roomNo;
+
+  var Room = mongodb.collection('room');
+
+  Room.findOne({ no: roomNo }, function (err, room) {
+    if (room) {
+      delete room.seats;
+      res.json(room);
+    } else {
+      res.json({message: '房间未找到'});
+    }
+  });
+});
+
+app.post('/sitDown', function (req, res) {
+  var roomNo = req.body.roomNo;
+  var seatNo = req.body.seatNo;
+  var userId = req.cookies.userId;
+
+  if (!userId) {
+    res.json({message: '未登录'});
+    return;
+  }
+
+  var Room = mongodb.collection('room');
+  Room.findOne({ no: roomNo }, function (error, room) {
+    var hasSitDown = false;
+    var seatInfo;
+    var seatHasSitDown = false;
+    room.users.forEach(function (user) {
+      if (user.userId === userId) {
+        seatInfo = user;
+        hasSitDown = true;
+      }
+      if (user.seatNo === seatNo) {
+        seatHasSitDown = true;
+      }
+    });
+
+    if (hasSitDown) {
+      res.json({message: '你已经坐下了', seatInfo});
+      return;
+    }
+
+    if (seatHasSitDown) {
+      res.json({message: '座位已经被占领了', seatInfo});
+      return;
+    }
+
+    room.users.push({ userId: userId, seatNo: seatNo });
+    var role = room.seats[seatNo - 1];
+
+    Room.update({ no: roomNo }, {$set: {users: room.users}}, function (err) {
+      res.json({message: 'ok', role: role});
     });
   });
 });

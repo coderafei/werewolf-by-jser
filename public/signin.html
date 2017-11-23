@@ -41,6 +41,10 @@
         <div class="signin-btn-con">
           <a href="#" v-on:click="signin" class="weui-btn weui-btn_primary">登录</a>
         </div>
+
+        <div class="signin-btn-con">
+            <a href="#" v-on:click="gotoSignup" class="weui-btn weui-btn_primary">注册</a>
+          </div>
       
         <div class="copyright">
           &copy; 东农Jser俱乐部
@@ -68,8 +72,11 @@
           };
 
           axios.post('/signin', data).then(function (res) {
-            alert(res.data.message);
+            location = '/index.html';
           });
+        },
+        gotoSignup() {
+          location.href = '/signup.html';
         }
       }
     })

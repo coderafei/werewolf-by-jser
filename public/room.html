@@ -4,47 +4,93 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>狼人杀</title>
   <link rel="stylesheet" href="//res.wx.qq.com/open/libs/weui/1.1.2/weui.min.css">
+  <title>房间号：</title>
   <style>
-    .btn-con {
-      margin: 12px;
+    .seat {
+      height: 90px;
+      width: 90px;
+      background: pink;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      color: #FFF;
+    }
+    .seat-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin: 16px;
+    }
+    .seat-container .seat {
+      margin-bottom: 12px;
+    }
+    .role-info {
+      text-align: center;
+      font-size: 26px;
+      color: #179b16;
     }
   </style>
 </head>
 <body>
-  
-    <div class="btn-con">
-        <a href="#" id="btn" class="weui-btn weui-btn_primary">创建房间</a>
+  <div id="app">
+    <div class="seat-container">
+      <div v-for="seat in roomInfo.seats" class="seat" @click="sitDown(seat)">
+        <span class="seat-no">{{seat}}</span>
+      </div>
     </div>
 
-    <div style="height: 36px;"></div>
-
-    <!-- 输入框 -->
-    <div class="weui-cells weui-cells_form">
-        <div class="weui-cell">
-            <div class="weui-cell__hd"><label class="weui-label">房间号</label></div>
-            <div class="weui-cell__bd">
-                <input class="weui-input" type="text" placeholder="请输入房间号">
-            </div>
-        </div>
-    </div>
-    <div class="btn-con">
-        <a href="#" id="btn" class="weui-btn weui-btn_primary">加入房间</a>
-    </div>
+    <div class="role-info">{{role}}</div>
     
+  </div>
 
-    <script src="https://cdn.bootcss.com/axios/0.16.2/axios.min.js"></script>
-    <script>
-      document.getElementById('btn').onclick = function () {
-        axios.get('/createRoom').then(function (res) {
-          if (res.data.message === '请登录后再操作') {
-            location = '/signin.html';
-            return;
-          }
-          console.log(res.data);
-        })
+  <script src="https://cdn.bootcss.com/vue/2.4.4/vue.min.js"></script>
+  <script src="https://cdn.bootcss.com/axios/0.16.2/axios.min.js"></script>
+  <script type="text/javascript" src="https://res.wx.qq.com/open/libs/weuijs/1.1.3/weui.min.js"></script>
+  <script>
+    var roomNo = '';
+    location.search.replace('?', '').split('&').forEach(function (item) { 
+      if (item.indexOf('roomNo') !== -1) {
+        roomNo = item.split('=')[1];
+        document.title = '房间号：' + roomNo;
       }
-    </script>
+    });
+
+    var app = new Vue({
+      el: '#app',
+      data: {
+        roomNo: roomNo,
+        roomInfo: {},
+        role: ''
+      },
+      methods: {
+        sitDown(seatNo) {
+          var that = this;
+          axios.post('/sitDown', { roomNo, seatNo }).then(function(response) {
+            if (response.data.message === 'ok') {
+              that.role = response.data.role;
+            } else {
+              alert(response.data.message);
+            }
+          });
+        }
+      }
+    });
+
+    axios.post('/roomInfo', {roomNo: roomNo}).then(function (res) {
+      if (res.data.message === '房间未找到') {
+        weui.alert('房间未找到', function () {
+          location.href = '/index.html';
+          return;
+        });
+      }
+      app.roomInfo = res.data;
+      app.roomInfo.seats = [];
+      for (var i = 0; i < app.roomInfo.totalPlayerCount; i++) {
+        app.roomInfo.seats.push(i + 1);
+      }
+    });
+  </script>
 </body>
 </html>
