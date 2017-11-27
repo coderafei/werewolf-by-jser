@@ -187,6 +187,26 @@ app.post('/sitDown', function (req, res) {
   });
 });
 
+app.post('/getMyRole', function (req, res) {
+  var roomNo = req.body.roomNo;
+  var userId = req.cookies.userId;
+
+  var Room = mongodb.collection('room');
+
+  Room.findOne({ no: roomNo }, function (err, room) {
+    var seatNo = 0;
+    room.users.forEach(function (user) {
+      if (user.userId === userId) {
+        seatNo = user.seatNo;
+      }
+    });
+
+    var role = room.seats[seatNo - 1];
+
+    res.json({ role: role });
+  });
+});
+
 app.listen(3000, function () {
   console.log('Server startup, listening port 3000');
 });

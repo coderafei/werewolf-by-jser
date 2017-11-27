@@ -12,8 +12,9 @@
       width: 90px;
       background: pink;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
+      justify-content: center;
       font-size: 24px;
       color: #FFF;
     }
@@ -31,6 +32,9 @@
       font-size: 26px;
       color: #179b16;
     }
+    .seat-info {
+      font-size: 18px;
+    }
   </style>
 </head>
 <body>
@@ -38,11 +42,16 @@
     <div class="seat-container">
       <div v-for="seat in roomInfo.seats" class="seat" @click="sitDown(seat)">
         <span class="seat-no">{{seat}}</span>
+        <span class="seat-info">
+          {{seatsHasBeenSit.indexOf(seat) === -1 ? '选我选我' : '有主了'}}
+        </span>
       </div>
     </div>
 
     <div class="role-info">{{role}}</div>
-    
+    <button @click="updateRoomInfo" class="weui-btn weui-btn_default">更新房间信息</button>
+
+    <button @click="showRole" class="weui-btn weui-btn_default">查看身份</button>
   </div>
 
   <script src="https://cdn.bootcss.com/vue/2.4.4/vue.min.js"></script>
@@ -62,17 +71,43 @@
       data: {
         roomNo: roomNo,
         roomInfo: {},
-        role: ''
+        role: '',
+        seatsHasBeenSit: []
+      },
+      created() {
+        var that = this;
+        setInterval(function () {
+          that.updateRoomInfo();
+        }, 1000);
       },
       methods: {
         sitDown(seatNo) {
           var that = this;
           axios.post('/sitDown', { roomNo, seatNo }).then(function(response) {
             if (response.data.message === 'ok') {
-              that.role = response.data.role;
+              alert('占座成功');
             } else {
               alert(response.data.message);
             }
+          });
+        },
+        updateRoomInfo() {
+          var that = this;
+          axios.post('/roomInfo', {roomNo: roomNo}).then(function (res) {
+            var seatsHasBeenSit = [];
+            res.data.users.forEach(function (user) {
+              seatsHasBeenSit.push(user.seatNo);
+            });
+            that.seatsHasBeenSit = seatsHasBeenSit;
+          });
+        },
+        showRole() {
+          var that = this;
+          axios.post('/getMyRole', { roomNo: roomNo}).then(function (res) {
+            that.role = res.data.role;
+            setTimeout(() => {
+              that.role = '';
+            }, 1000);
           });
         }
       }
@@ -90,6 +125,12 @@
       for (var i = 0; i < app.roomInfo.totalPlayerCount; i++) {
         app.roomInfo.seats.push(i + 1);
       }
+
+      var seatsHasBeenSit = [];
+      res.data.users.forEach(function (user) {
+        seatsHasBeenSit.push(user.seatNo);
+      });
+      app.seatsHasBeenSit = seatsHasBeenSit;
     });
   </script>
 </body>
